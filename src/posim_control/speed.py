@@ -29,10 +29,10 @@ class RoughWaterWatch:
  """
  WINDOW_SECONDS=8.
  CALM_SECONDS=45.
- TILT_ON_DEGREES=20.
+ TILT_ON_DEGREES=30.
  TILT_OFF_DEGREES=10.
- HEAVE_ON_METRES=.85
- HEAVE_OFF_METRES=.45
+ HEAVE_ON_METRES=1.2
+ HEAVE_OFF_METRES=.8
 
  def __init__(self,rough=False):
   self.rough=rough;self.nonce=None;self.last=None;self.calm_since=None;self.samples={}

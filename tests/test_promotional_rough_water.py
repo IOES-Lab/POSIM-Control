@@ -20,14 +20,42 @@ def pose(z=0.,tilt=0.):
 class RoughWater(unittest.TestCase):
  def test_either_hull_can_reduce_cruise(self):
   watch=RoughWaterWatch()
-  value=watch.update('a',0.,dict(lead=pose(),follower=pose(tilt=21.)))
+  value=watch.update('a',0.,dict(lead=pose(),follower=pose(tilt=31.)))
   self.assertTrue(value['rough']);self.assertEqual(value['speed_cap_mps'],7.)
   self.assertEqual(target_speed(False,False,30,rough=value['rough']),7.)
 
  def test_heave_needs_four_seconds_of_real_observations(self):
   watch=RoughWaterWatch()
-  for t in range(4):self.assertFalse(watch.update('a',float(t),dict(lead=pose(z=(-1)**t*.5)))['rough'])
-  self.assertTrue(watch.update('a',4.,dict(lead=pose(z=.5)))['rough'])
+  for t in range(4):self.assertFalse(watch.update('a',float(t),dict(lead=pose(z=(-1)**t*.65)))['rough'])
+  self.assertTrue(watch.update('a',4.,dict(lead=pose(z=.65)))['rough'])
+
+ def test_moderate_tilt_and_heave_keep_cruise(self):
+  watch=RoughWaterWatch()
+  for t in range(12):
+   value=watch.update('a',float(t),dict(lead=pose(z=(-1)**t*.59,tilt=29.9)))
+   self.assertFalse(value['rough'])
+   self.assertEqual(target_speed(False,False,30,rough=value['rough']),10.5)
+
+ def test_moderate_heave_releases_after_full_calm_hold(self):
+  watch=RoughWaterWatch(rough=True)
+  for t in range(49):
+   self.assertTrue(watch.update('a',float(t),dict(lead=pose(z=(-1)**t*.395,tilt=9.)))['rough'])
+  value=watch.update('a',49.,dict(lead=pose(z=-.395,tilt=9.)))
+  self.assertFalse(value['rough']);self.assertEqual(value['speed_cap_mps'],10.5)
+
+ def test_heave_at_release_threshold_keeps_rough_limit(self):
+  watch=RoughWaterWatch(rough=True)
+  for t in range(60):
+   self.assertTrue(watch.update('a',float(t),dict(lead=pose(z=(-1)**t*.4)))['rough'])
+  self.assertIsNone(watch.calm_since)
+
+ def test_moderate_heave_peak_restarts_calm_hold(self):
+  watch=RoughWaterWatch(rough=True)
+  for t in range(30):watch.update('a',float(t),dict(lead=pose(z=(-1)**t*.3)))
+  watch.update('a',30.,dict(lead=pose(z=.6)))
+  for t in range(31,84):
+   self.assertTrue(watch.update('a',float(t),dict(lead=pose(z=(-1)**t*.3)))['rough'])
+  self.assertFalse(watch.update('a',84.,dict(lead=pose(z=.3)))['rough'])
 
  def test_speed_changes_do_not_lift_canal_or_clearance_limits(self):
   for clearance,canal in [(1.,False),(None,False),(30.,True)]:
@@ -35,7 +63,7 @@ class RoughWater(unittest.TestCase):
   self.assertEqual(target_speed(True,False,30,pending=True),10.5)
 
  def test_calm_hold_excludes_window_peak_and_duplicate_frames(self):
-  watch=RoughWaterWatch();watch.update('a',0.,dict(lead=pose(tilt=21.)))
+  watch=RoughWaterWatch();watch.update('a',0.,dict(lead=pose(tilt=31.)))
   for t in range(1,54):self.assertTrue(watch.update('a',float(t),dict(lead=pose()))['rough'])
   for _ in range(100):self.assertTrue(watch.update('a',53.,dict(lead=pose()))['rough'])
   self.assertFalse(watch.update('a',54.,dict(lead=pose()))['rough'])
