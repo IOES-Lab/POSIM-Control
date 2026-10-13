@@ -2,13 +2,29 @@
 import math,sys,unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-from posim_control.recovery import ProgressWatch,RouteProgressWatch,ClockProgressWatch,escape_route,coastal_frontiers
+from posim_control.recovery import ProgressWatch,RouteProgressWatch,ClockProgressWatch,PlanningWaitWatch,escape_route,coastal_frontiers
 
 class Slope:
  def maximum(self,x,y,r):
   return -(x-r)*2-4 if abs(y)+r<250 and abs(x)+r<250 else None
 
 class RecoveryContracts(unittest.TestCase):
+ def test_route_wait_recovers_without_nonzero_thrust_and_repeats_at_bounded_intervals(self):
+  watch=PlanningWaitWatch();key=('world',0,7,145)
+  self.assertFalse(watch.update(key,0.,[0.,0.],True))
+  for t in (30.,60.,119.):self.assertFalse(watch.update(key,t,[1.,1.],True))
+  self.assertTrue(watch.update(key,120.,[1.,1.],True))
+  self.assertFalse(watch.update(key,121.,[1.,1.],True))
+  self.assertTrue(watch.update(key,240.,[1.,1.],True))
+ def test_route_wait_resets_for_movement_service_operator_hold_and_new_world(self):
+  watch=PlanningWaitWatch();key=('world',0,7,145)
+  watch.update(key,0.,[0.,0.],True)
+  self.assertFalse(watch.update(key,119.,[25.,0.],True))
+  self.assertFalse(watch.update(key,121.,[25.,0.],True))
+  self.assertFalse(watch.update(key,300.,[25.,0.],False))
+  self.assertFalse(watch.update(key,301.,[25.,0.],True))
+  self.assertFalse(watch.update(('new',0,7,145),500.,[25.,0.],True))
+  self.assertFalse(watch.update(('new',0,7,145),10.,[25.,0.],True))
  def test_occasional_fresh_messages_do_not_hide_frozen_physics(self):
   watch=ClockProgressWatch()
   for t in range(60):self.assertFalse(watch.update('a',t*.005,float(t)))

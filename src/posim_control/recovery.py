@@ -75,6 +75,22 @@ class ProgressWatch:
         return False
 
 
+class PlanningWaitWatch:
+    """Detect a routing hold even though the controller intentionally asks for zero thrust."""
+    def __init__(self, interval=120.):
+        self.interval=interval;self.anchor=None
+
+    def update(self, key, wall_time, position, waiting):
+        if not waiting:
+            self.anchor=None;return False
+        if (self.anchor is None or self.anchor[0]!=key or wall_time<self.anchor[1]
+                or math.dist(position,self.anchor[2])>20.):
+            self.anchor=(key,wall_time,list(position));return False
+        if wall_time-self.anchor[1]>=self.interval:
+            self.anchor=(key,wall_time,list(position));return True
+        return False
+
+
 class RouteProgressWatch:
     """Circling is motion, but does not count as progress to a waypoint."""
     def __init__(self):self.anchor=None
