@@ -52,7 +52,8 @@ Send `gz.msgs.Double_V` to `/wwos/promotional/path` as `[mode, speed_mps, count,
 - Follower speed cap: 11.9 m/s
 - Follower target separation: 38 m
 - Rough-water speed cap: 7 m/s
-- Shallow-water and canal cap: 4 m/s
+- Measured shallow-water cap: 6 m/s
+- Canal and unavailable-depth cap: 4 m/s
 
 The follower follows measured leader poses. Clock, progress, tilt and rough-water policies use actual observations. Recovery helpers propose terrain-checked motion; the caller authorizes and reports assisted recovery.
 

@@ -7,7 +7,8 @@ CRUISE_MPS=10.5
 ROUGH_MPS=7.
 APPROACH_MPS=CRUISE_MPS
 FOLLOWER_MAX_MPS=11.9
-SHALLOW_MPS=4.
+SHALLOW_MPS=6.
+UNKNOWN_DEPTH_MPS=4.
 CANAL_MPS=4.
 
 def sensitive_water(near_port,canal,clearance,caution=False):
@@ -15,9 +16,9 @@ def sensitive_water(near_port,canal,clearance,caution=False):
 
 def target_speed(near_port,canal,clearance,pending=False,rough=False):
  # Depth constrains safe speed; a port label and background downloads do not.
- if clearance is None:return SHALLOW_MPS
- if clearance<2:return SHALLOW_MPS
  if canal:return CANAL_MPS
+ if clearance is None:return UNKNOWN_DEPTH_MPS
+ if clearance<2:return SHALLOW_MPS
  return ROUGH_MPS if rough else CRUISE_MPS
 
 
