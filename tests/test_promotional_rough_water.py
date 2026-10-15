@@ -57,10 +57,15 @@ class RoughWater(unittest.TestCase):
    self.assertTrue(watch.update('a',float(t),dict(lead=pose(z=(-1)**t*.3)))['rough'])
   self.assertFalse(watch.update('a',84.,dict(lead=pose(z=.3)))['rough'])
 
- def test_speed_changes_do_not_lift_canal_or_clearance_limits(self):
-  for clearance,canal in [(1.,False),(None,False),(30.,True)]:
-   self.assertEqual(target_speed(True,canal,clearance,pending=True,rough=True),4.)
-  self.assertEqual(target_speed(True,False,30,pending=True),10.5)
+ def test_shallow_speed_preserves_canal_unknown_depth_and_rough_limits(self):
+  for rough in (False,True):
+   for clearance in (1.,1.999):
+    self.assertEqual(target_speed(True,False,clearance,pending=True,rough=rough),6.)
+   for clearance in (None,1.,30.):
+    self.assertEqual(target_speed(True,True,clearance,pending=True,rough=rough),4.)
+   self.assertEqual(target_speed(False,False,None,rough=rough),4.)
+  self.assertEqual(target_speed(True,False,2.,pending=True),10.5)
+  self.assertEqual(target_speed(True,False,2.,rough=True),7.)
 
  def test_calm_hold_excludes_window_peak_and_duplicate_frames(self):
   watch=RoughWaterWatch();watch.update('a',0.,dict(lead=pose(tilt=31.)))
