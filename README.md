@@ -2,6 +2,8 @@
 
 [한국어](README.ko.md)
 
+> This project is developed with assistance from large language models (LLMs).
+
 Native Gazebo controllers for a surface leader and follower, plus Python policies for speed, rough water, stability and recovery. Controllers apply propulsion to physical models. WWW-POSIM supplies collision-checked paths and observes measured progress.
 
 ## Python policies
